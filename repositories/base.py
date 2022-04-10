@@ -18,7 +18,7 @@ class BaseRepository(Generic[DBModel]):
 
     def __init__(self):
         self.session: AsyncSession = create_async_session()
-        self.model: DBModel = get_args(self.__orig_bases__[0])[0]()  # lol this actually works:P
+        self.model: Type[DBModel] = get_args(self.__orig_bases__[0])[0]  # lol this actually works:P
 
     async def close(self):
         if self.session is not None:

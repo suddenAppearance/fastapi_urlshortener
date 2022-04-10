@@ -1,8 +1,9 @@
 import traceback
-from typing import TypeVar, Generic, get_args, List, Optional
+from typing import TypeVar, Generic, get_args, List, Optional, Type
 
 from fastapi import HTTPException
-from sqlalchemy.exc import DBAPIError
+from pydantic import ValidationError
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from repositories.base import DBException
 
@@ -12,7 +13,7 @@ SchemaModel = TypeVar('SchemaModel')
 
 class BaseService(Generic[SchemaModel, RepositoryModel]):
     def __init__(self):
-        self.schema: SchemaModel = get_args(self.__orig_bases__[0])[0]()
+        self.schema: Type[SchemaModel] = get_args(self.__orig_bases__[0])[0]
         self.repo: RepositoryModel = get_args(self.__orig_bases__[0])[1]()
 
     async def __aenter__(self):
@@ -24,8 +25,11 @@ class BaseService(Generic[SchemaModel, RepositoryModel]):
         except DBException:
             raise HTTPException(status_code=400, detail=f"{str(exc_val)}")
 
-        if exc_type == DBAPIError:
-            raise HTTPException(status_code=409, detail=f"{str(exc_val)}")
+        if exc_type in [DBAPIError, IntegrityError]:
+            raise HTTPException(status_code=409, detail=f"{exc_val._message()}")
+
+        if exc_type == HTTPException:
+            raise exc_val
 
         elif exc_val is not None:
             raise HTTPException(status_code=500,
@@ -41,10 +45,10 @@ class BaseService(Generic[SchemaModel, RepositoryModel]):
         db_users = await self.repo.get_all(limit, offset)
         return self.__convert_all(db_users)
 
-    async def _get_all_where(self, **filters) -> List[SchemaModel]:
+    async def get_all_where(self, **filters) -> List[SchemaModel]:
         db_users = await self.repo.get_all_where(**filters)
         return self.__convert_all(db_users)
 
-    async def _get_where(self, **filters) -> Optional[SchemaModel]:
+    async def get_where(self, **filters) -> Optional[SchemaModel]:
         db_user: Optional[SchemaModel] = await self.repo.get_where(**filters)
         return self.__convert(db_user) if db_user is not None else None
