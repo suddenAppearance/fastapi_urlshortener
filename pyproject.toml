@@ -11,6 +11,9 @@ psycopg-binary = "^3.0.11"
 asyncpg = "^0.25.0"
 SQLAlchemy = {extras = ["async"], version = "^1.4.35"}
 alembic = "^1.7.7"
+psycopg2-binary = "^2.9.3"
+passlib = "^1.7.4"
+PyJWT = "^2.3.0"
 
 [tool.poetry.dev-dependencies]
 

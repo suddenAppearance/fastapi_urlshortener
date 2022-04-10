@@ -1,9 +1,9 @@
-from typing import TypeVar, Generic, get_args, List, Optional
+from typing import TypeVar, Generic, get_args, List, Optional, Type
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# from db.base import create_async_session
+from db.base import create_async_session, Base
 
 DBModel = TypeVar('DBModel')
 
@@ -15,11 +15,10 @@ class DBException(Exception):
 
 
 class BaseRepository(Generic[DBModel]):
-    session: AsyncSession
 
     def __init__(self):
-        self.session: AsyncSession = ...  # create_async_session()
-        self.model = get_args(self.__orig_bases__[0])[0]()  # lol this actually works:P
+        self.session: AsyncSession = create_async_session()
+        self.model: DBModel = get_args(self.__orig_bases__[0])[0]()  # lol this actually works:P
 
     async def close(self):
         if self.session is not None:
