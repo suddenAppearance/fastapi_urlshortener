@@ -35,6 +35,9 @@ class BaseService(Generic[SchemaModel, RepositoryModel]):
             raise HTTPException(status_code=500,
                                 detail=f"Internal server error. {exc_type}: {exc_val}\n{traceback.format_tb(exc_tb)}")
 
+    def convert_all(self, instances) -> List[SchemaModel]:
+        return self.__convert_all(instances)
+
     def __convert_all(self, instances) -> List[SchemaModel]:
         return [self.__convert(db_user) for db_user in instances]
 

@@ -1,6 +1,9 @@
 import binascii
 import os
 from hashlib import md5
+from typing import List
+
+from fastapi import HTTPException
 
 from repositories.urls import UrlsRepository
 from schemas.urls import BaseUrlSchema, UrlSchema
@@ -38,5 +41,16 @@ class UrlsService(BaseService[UrlSchema, UrlsRepository]):
 
     async def get_and_visit(self, url_hash: str):
         url = await self.repo.get_where(hash=url_hash)
+        if not url:
+            raise HTTPException(status_code=404, detail="Not found")
         url.increase_visits()
         return UrlSchema.from_orm(url)
+
+    async def get_all_where_order_by(self, order_by: str = 'id', asc=True, **filters, ) -> List[UrlSchema]:
+        return self.convert_all(await self.repo.get_all_where_order_by(order_by, asc, **filters))
+
+    async def delete_by_id(self, user: BaseUserSchema, id: int):
+        if (await self.get_where(id=id)).user.username == user.username:
+            await self.repo.delete_by_id(id)
+        else:
+            raise HTTPException(status_code=403, detail="Can't delete other user's url")
