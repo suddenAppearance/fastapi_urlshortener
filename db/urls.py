@@ -17,5 +17,7 @@ class Url(Base):
 
     user = relationship("User", back_populates="urls", lazy="selectin")
 
+    # this will increase value via SQL, not Python.
+    # 1 query and no race condition
     def increase_visits(self):
-        self.visits = self.visits + 1  # safe increase instead of potential += which may cause race condition
+        self.visits = self.visits + 1

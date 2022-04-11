@@ -20,7 +20,7 @@ async def authenticate_user(form_data: OAuth2PasswordRequestForm = Depends()) ->
     return user
 
 
-@router.post("/token")
+@router.post("/token/")
 async def obtain_token(user: Optional[BaseUserSchema] = Depends(authenticate_user)):
     if user is None:
         raise HTTPException(

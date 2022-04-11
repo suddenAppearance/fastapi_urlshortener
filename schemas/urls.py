@@ -1,4 +1,6 @@
-from pydantic import BaseModel
+from typing import Optional
+
+from pydantic import BaseModel, AnyUrl
 
 from schemas.users import BaseUserSchema
 
@@ -8,9 +10,10 @@ class BaseUrlSchema(BaseModel):
 
 
 class UrlSchema(BaseModel):
-    id: int
+    id: Optional[int]
     hash: str
-    url: str
+    url: AnyUrl
+    visits: int = 0
     user: BaseUserSchema
 
     class Config:
