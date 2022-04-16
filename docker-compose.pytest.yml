@@ -12,7 +12,8 @@ services:
 
   web:
     build: .
-    command: bash -c "pytest"
+    # wait 5s for db to be loaded, run alembic upgrade, start uvicorn in background, wait 5s to server to start, run tests
+    command: bash -c "sleep 5 && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 & sleep 10 && pytest"
     volumes:
       - .:/app
     env_file:

@@ -21,12 +21,22 @@ Technologies:
         * _deault_: `postgresql+asyncpg://postgres:postgres@db/urlshortener`
     * `SECRET_KEY` - Secret key of app. PyJWT uses that to safely encode and decode jwt tokens
         * _default_: random string, e.g. script for generating `binascii.hexlify(os.urandom(20)).decode()`
-2. Run `docker-compose up --build` to run server and databse
+2. Run `docker-compose up --build` to run server and database
+   * consider running `docker-compose down --volumes` to delete all existing volumes
+   * or delete only postgres volumes with `docker-compose volume rm`
 3. Optional. Debug run in PyCharm
     * You have to change `@db` to `@localhost` in `.env` variables
     * Then add this `.env` to EnvFile setting of `main.py`
-    * Run `docker-compose up --build db` to only run database
+    * Run `docker-compose up --build db` to only run database (`docker-compose down --volumes` if needed)
+    * Run `docker-compose run web alembic upgrade head` to migrate
     * Start `main.py` in debug mode
+
+# Tests execution
+1. Add `test.env` file to project root and define next env variables
+   * all env variables from local run.
+2. Run `docker-compose down --volumes && docker-compose -f docker-compose.pytest.yml up --build --abort-on-container-exit` to run server, database and pytest 
+3. Optional. Debug pytest in PyCharm
+   * You have to locally run web server and database. Then debug tests via PyCharm run & debug tools
 
 ## Alembic
 

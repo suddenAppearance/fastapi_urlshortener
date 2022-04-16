@@ -2,18 +2,17 @@ from fastapi import APIRouter, Depends
 from starlette.responses import RedirectResponse
 
 from api.api_v1.deps import get_current_user
-from schemas.urls import BaseUrlSchema
+from schemas.urls import BaseUrlSchema, UrlSchema
 from schemas.users import BaseUserSchema
 from services.urls import UrlsService
 
 router = APIRouter()
 
 
-@router.post("/")
-async def create_url(url: BaseUrlSchema, user: BaseUserSchema = Depends(get_current_user)):
+@router.post("/", response_model=UrlSchema)
+async def create_url(url: BaseUrlSchema, user: BaseUserSchema = Depends(get_current_user)) -> UrlSchema:
     async with UrlsService() as service:
-        await service.create(url, user)
-    return {"message": "ok"}
+        return await service.create(url, user)
 
 
 @router.get("/")
